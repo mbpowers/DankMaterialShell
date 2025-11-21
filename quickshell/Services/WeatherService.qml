@@ -312,10 +312,6 @@ Singleton {
             "forecast_days=7"
         ]
 
-        if (SettingsData.useFahrenheit) {
-            params.push("temperature_unit=fahrenheit")
-        }
-
         return "https://api.open-meteo.com/v1/forecast?" + params.join('&')
     }
 
@@ -751,11 +747,6 @@ Singleton {
                                                         root.lastFetchTime = 0
                                                         root.forceRefresh()
                                                     })
-
-        SettingsData.useFahrenheitChanged.connect(() => {
-                                                       root.lastFetchTime = 0
-                                                       root.forceRefresh()
-                                                   })
 
         SettingsData.weatherEnabledChanged.connect(() => {
                                                        if (SettingsData.weatherEnabled && root.refCount > 0 && !root.weather.available) {
