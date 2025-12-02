@@ -23,22 +23,22 @@ Item {
         try {
             if (type === "hour") {
                 const date = new Date();
-                date.setHours(hourlyList.currentIndex);
+                date.setHours(hourlyList.currentIndex - 1);
                 dateStepper.currentDate = date;
 
-                dailyList.currentIndex = Math.max(0, Math.min((WeatherService.weather.forecast?.length ?? 1) - 1, WeatherService.calendarDayDifference((new Date()), date)));
+                dailyList.currentIndex = Math.max(0, Math.min((WeatherService.weather.forecast?.length ?? 0) + 1, WeatherService.calendarDayDifference((new Date()), date) + 1));
             } else if (type === "day") {
                 const date = new Date(dateStepper.currentDate);
                 date.setMonth((new Date()).getMonth());
-                date.setDate((new Date()).getDate() + dailyList.currentIndex);
+                date.setDate((new Date()).getDate() + dailyList.currentIndex - 1);
                 dateStepper.currentDate = date;
 
-                const hourIndex = Math.max(0, Math.min((WeatherService.weather.hourlyForecast?.length ?? 1) - 1, WeatherService.calendarHourDifference((new Date()), date) + (new Date).getHours()));
+                const hourIndex = Math.max(0, Math.min((WeatherService.weather.hourlyForecast?.length ?? 0) + 1, WeatherService.calendarHourDifference((new Date()), date) + (new Date).getHours() + 1));
                 hourlyList.currentIndex = hourIndex;
             } else if (type === "date") {
                 const date = dateStepper.currentDate;
-                dailyList.currentIndex = Math.max(0, Math.min((WeatherService.weather.forecast?.length ?? 1) - 1, WeatherService.calendarDayDifference((new Date()), date)));
-                hourlyList.currentIndex = Math.max(0, Math.min((WeatherService.weather.hourlyForecast?.length ?? 1) - 1, WeatherService.calendarHourDifference((new Date()), date) + (new Date()).getHours()));
+                dailyList.currentIndex = Math.max(0, Math.min((WeatherService.weather.forecast?.length ?? 0) + 1, WeatherService.calendarDayDifference((new Date()), date) + 1));
+                hourlyList.currentIndex = Math.max(0, Math.min((WeatherService.weather.hourlyForecast?.length ?? 0) + 1, WeatherService.calendarHourDifference((new Date()), date) + (new Date()).getHours() + 1));
             }
         } catch (e) {
             console.warn("Weather Date Sync Error:", e);
@@ -932,24 +932,24 @@ Item {
 
                     property var cardHeight: 100
                     property var cardWidth: ((hourlyList.width + hourlyList.spacing) / hourlyList.visibleCount) - hourlyList.spacing
-                    property int initialIndex: (new Date()).getHours()
+                    property int initialIndex: (new Date()).getHours() + 1
                     property bool dense: !SessionData.weatherHourlyDetailed
                     property int visibleCount: 8
 
-                    model: WeatherService.weather.hourlyForecast?.length ?? 0
+                    model: (WeatherService.weather.hourlyForecast?.length ?? 0) + 2
 
                     delegate: WeatherForecastCard {
-                        width: hourlyList.cardWidth
+                        width: forecastData ? hourlyList.cardWidth : hourlyList.width
                         height: hourlyList.cardHeight
                         dense: hourlyList.dense
                         daily: false
 
                         date: {
                             const d = new Date();
-                            d.setHours(index);
+                            d.setHours(index - 1);
                             return d;
                         }
-                        forecastData: WeatherService.weather.hourlyForecast?.[index]
+                        forecastData: WeatherService.weather.hourlyForecast?.[index - 1]
                     }
 
                     onCurrentIndexChanged: if (!syncing)
@@ -1064,24 +1064,24 @@ Item {
 
                     property var cardHeight: 100
                     property var cardWidth: ((dailyList.width + dailyList.spacing) / dailyList.visibleCount) - dailyList.spacing
-                    property int initialIndex: 0
+                    property int initialIndex: 1
                     property bool dense: false
                     property int visibleCount: 7
 
-                    model: WeatherService.weather.forecast?.length ?? 0
+                    model: (WeatherService.weather.forecast?.length ?? 0) + 2
 
                     delegate: WeatherForecastCard {
-                        width: dailyList.cardWidth
+                        width: forecastData ? dailyList.cardWidth : dailyList.width
                         height: dailyList.cardHeight
                         dense: true
                         daily: true
 
                         date: {
                             const date = new Date();
-                            date.setDate(date.getDate() + index);
+                            date.setDate(date.getDate() + index - 1);
                             return date;
                         }
-                        forecastData: WeatherService.weather.forecast?.[index]
+                        forecastData: WeatherService.weather.forecast?.[index - 1]
                     }
 
                     onCurrentIndexChanged: if (!syncing)
